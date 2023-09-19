@@ -12,19 +12,39 @@
 /* Procedure printToken prints a token 
  * and its lexeme to the listing file
  */
+
+/* NEED TO MODIFY */
 void printToken( TokenType token, const char* tokenString )
 { switch (token)
-  { case IF:
-    case THEN:
+  { 
+    /* RESERVED WORDS */
+    case IF:
     case ELSE:
-    case END:
-    case REPEAT:
-    case UNTIL:
-    case READ:
-    case WRITE:
-      fprintf(listing,
-         "reserved word: %s\n",tokenString);
-      break;
+    case WHILE:
+    case RETURN:
+    case INT:
+    case VOID:
+
+    /* SPECIAL SYMBOLS */
+    case ASSIGN:
+    case EQ:
+    case NE:
+    case LT:
+    case LE:
+    case GT:
+    case PLUS:
+    case MINUS:
+    case TIMES:
+    case OVER:
+    case LPAREN:
+    case RPAREN:
+    case LBRACE:
+    case RBRACE:
+    case LCURLY:
+    case RCURLY:
+    case SEMI:
+    case COMMA:
+    /*
     case ASSIGN: fprintf(listing,":=\n"); break;
     case LT: fprintf(listing,"<\n"); break;
     case EQ: fprintf(listing,"=\n"); break;
@@ -36,6 +56,7 @@ void printToken( TokenType token, const char* tokenString )
     case TIMES: fprintf(listing,"*\n"); break;
     case OVER: fprintf(listing,"/\n"); break;
     case ENDFILE: fprintf(listing,"EOF\n"); break;
+    */
     case NUM:
       fprintf(listing,
           "NUM, val= %s\n",tokenString);
