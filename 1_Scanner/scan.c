@@ -53,12 +53,16 @@ static void ungetNextChar(void)
 
 /* lookup table of reserved words */
 static struct
-    { char* str;
-      TokenType tok;
-    } reservedWords[MAXRESERVED]
-   = {{"if",IF},{"then",THEN},{"else",ELSE},{"end",END},
-      {"repeat",REPEAT},{"until",UNTIL},{"read",READ},
-      {"write",WRITE}};
+{ char* str;
+  TokenType tok;
+} reservedWords[MAXRESERVED] = {
+  {"if",IF},
+  {"else",ELSE},
+  {"while",WHILE},
+  {"return",RETURN},
+  {"int",INT},
+  {"void",VOID},
+};
 
 /* lookup an identifier to see if it is a reserved word */
 /* uses linear search */
