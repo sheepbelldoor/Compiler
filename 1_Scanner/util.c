@@ -18,32 +18,33 @@ void printToken( TokenType token, const char* tokenString )
 { switch (token)
   { 
     /* RESERVED WORDS */
-    case IF:
-    case ELSE:
-    case WHILE:
-    case RETURN:
-    case INT:
-    case VOID:
+    case IF: fprintf(listing,"reserved word: if\n"); break;
+    case ELSE: fprintf(listing,"reserved word: else\n"); break;
+    case WHILE: fprintf(listing,"reserved word: while\n"); break;
+    case RETURN: fprintf(listing,"reserved word: return\n"); break;
+    case INT: fprintf(listing,"reserved word: int\n"); break;
+    case VOID: fprintf(listing,"reserved word: void\n"); break;
 
     /* SPECIAL SYMBOLS */
-    case ASSIGN:
-    case EQ:
-    case NE:
-    case LT:
-    case LE:
-    case GT:
-    case PLUS:
-    case MINUS:
-    case TIMES:
-    case OVER:
-    case LPAREN:
-    case RPAREN:
-    case LBRACE:
-    case RBRACE:
-    case LCURLY:
-    case RCURLY:
-    case SEMI:
-    case COMMA:
+    case ASSIGN: fprintf(listing,"=\n"); break;
+    case EQ: fprintf(listing,"==\n"); break;
+    case NE: fprintf(listing,"!=\n"); break;
+    case LT: fprintf(listing,"<\n"); break;
+    case LE: fprintf(listing,"<=\n"); break;
+    case GT: fprintf(listing,">\n"); break;
+    case GE: fprintf(listing,">=\n"); break;
+    case PLUS: fprintf(listing,"+\n"); break;
+    case MINUS: fprintf(listing,"-\n"); break;
+    case TIMES: fprintf(listing,"*\n"); break;
+    case OVER: fprintf(listing,"/\n"); break;
+    case LPAREN: fprintf(listing,"(\n"); break;
+    case RPAREN: fprintf(listing,")\n"); break;
+    case LBRACE: fprintf(listing,"[\n"); break;
+    case RBRACE: fprintf(listing,"]\n"); break;
+    case LCURLY: fprintf(listing,"{\n"); break;
+    case RCURLY: fprintf(listing,"}\n"); break;
+    case SEMI: fprintf(listing,";\n"); break;
+    case COMMA: fprintf(listing,",\n"); break;
     /* DEPRECATED
     case ASSIGN: fprintf(listing,":=\n"); break;
     case LT: fprintf(listing,"<\n"); break;

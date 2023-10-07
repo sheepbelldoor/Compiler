@@ -11,7 +11,7 @@
 
 /* states in scanner DFA */
 typedef enum
-   { START,INASSIGN,INCOMMENT,INNUM,INID,DONE }
+   { START,INEQ,INLT,INGT,INNE,INOVER,INCOMMENT,INCOMMENT_,INNUM,INID,DONE }
    StateType;
 
 /* lexeme of identifier or reserved word */
@@ -98,13 +98,19 @@ TokenType getToken(void)
            state = INNUM;
          else if (isalpha(c))
            state = INID;
-         else if (c == ':')
-           state = INASSIGN;
          else if ((c == ' ') || (c == '\t') || (c == '\n'))
            save = FALSE;
-         else if (c == '{')
+         else if (c == '=')
+           state = INEQ;
+         else if (c == '<')
+           state = INLT;
+         else if (c == '>')
+           state = INGT;
+         else if (c == '!')
+           state = INNE;    
+         else if (c == '/')
          { save = FALSE;
-           state = INCOMMENT;
+           state = INOVER;
          }
          else
          { state = DONE;
@@ -112,12 +118,6 @@ TokenType getToken(void)
            { case EOF:
                save = FALSE;
                currentToken = ENDFILE;
-               break;
-             case '=':
-               currentToken = EQ;
-               break;
-             case '<':
-               currentToken = LT;
                break;
              case '+':
                currentToken = PLUS;
@@ -128,22 +128,83 @@ TokenType getToken(void)
              case '*':
                currentToken = TIMES;
                break;
-             case '/':
-               currentToken = OVER;
-               break;
              case '(':
                currentToken = LPAREN;
                break;
              case ')':
                currentToken = RPAREN;
                break;
+             case '[':
+               currentToken = LBRACE;
+               break;
+             case ']':
+               currentToken = RBRACE;
+               break;
+             case '{':
+               currentToken = LCURLY;
+               break;
+             case '}':
+               currentToken = RCURLY;
+               break;
              case ';':
                currentToken = SEMI;
+               break;
+               break;
+             case ',':
+               currentToken = COMMA;
                break;
              default:
                currentToken = ERROR;
                break;
            }
+         }
+         break;
+       case INEQ:
+         state = DONE;
+         if (c == '=')
+           currentToken = EQ;
+         else
+         { save = FALSE;
+           currentToken = ASSIGN;
+           ungetNextChar();
+         }
+         break;
+       case INLT:
+         state = DONE;
+         if (c == '=')
+           currentToken = LE;
+         else
+         { save = FALSE;
+           currentToken = LT;
+           ungetNextChar();
+         }
+       case INGT:
+         state = DONE;
+         if (c == '=')
+           currentToken = GE;
+         else
+         { save = FALSE;
+           currentToken = GT;
+           ungetNextChar();
+         }
+       case INNE:
+         state = DONE;
+         if (c == '=')
+           currentToken = NE;
+         else
+         { save = FALSE;
+           currentToken = Error;
+           ungetNextChar();
+         }
+       case INOVER:
+         if (c == '*')
+         { state = INCOMMENT;
+           save = FALSE;          
+         }
+         else
+         { state = DONE;
+           currentToken = OVER;
+           ungetNextChar();
          }
          break;
        case INCOMMENT:
@@ -152,18 +213,18 @@ TokenType getToken(void)
          { state = DONE;
            currentToken = ENDFILE;
          }
-         else if (c == '}') state = START;
+         else if (c == '*') state = INCOMMENT_;
          break;
-       case INASSIGN:
-         state = DONE;
-         if (c == '=')
-           currentToken = ASSIGN;
-         else
-         { /* backup in the input */
-           ungetNextChar();
-           save = FALSE;
-           currentToken = ERROR;
+       case INCOMMENT_:
+         save = FALSE;
+         if (c == EOF)
+         { state = DONE;
+           currentToken = ENDFILE;
          }
+         else if (c == '/') 
+           state = START;
+         else if (c != '*') 
+           state = INCOMMENT;
          break;
        case INNUM:
          if (!isdigit(c))
