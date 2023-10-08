@@ -1,0 +1,12 @@
+/* A program for test */
+
+void main(void)
+{ /* There is no ,,,'}' * **/
+    int x; int y;
+    while (a == 1) {}
+    x = input(); y = input();
+    int comment = 0;
+
+
+
+
