@@ -1,12 +1,20 @@
-/* A program for test */
+A
 
-void main(void)
-{ /* There is no ,,,'}' * **/
-    int x; int y;
-    while (a == 1) {}
-    x = input(); y = input();
-    int comment = 0;
+/ *
+   comment test 2
+   
+   */
 
+A
 
+/*
+   comment test 2
 
+   * /
+*/   
 
+B
+
+/*
+
+C

@@ -51,16 +51,19 @@ whitespace  [ \t]+
 {identifier}    {return ID;}
 {newline}       {lineno++;}
 {whitespace}    {/* skip whitespace */}
-"/*"            { int incomment = 0;
+"/*"            { int incomment = 1;
+                  int star = 0;
                   char c;
                   do
                   { c = input();
-                    if (c == EOF) break;
-                    if (incomment == 1 && c == '/') break;
-                    if (c == '*') incomment = 1;
-                    else incomment = 0;
+                    if (c == EOF || c == 0)
+                      incomment = 0;
+                    if (star == 1 && c == '/')
+                      incomment = 0;
+                    if (c == '*') star = 1;
+                    else star = 0;
                     if (c == '\n') lineno++;
-                  } while (1);
+                  } while (incomment);
                 }
 .               {return ERROR;}
 

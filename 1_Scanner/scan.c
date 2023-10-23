@@ -107,7 +107,7 @@ TokenType getToken(void)
          else if (c == '>')
            state = INGT;
          else if (c == '!')
-           state = INNE;    
+           state = INNE;
          else if (c == '/')
          { save = FALSE;
            state = INOVER;
@@ -178,6 +178,7 @@ TokenType getToken(void)
            currentToken = LT;
            ungetNextChar();
          }
+         break;
        case INGT:
          state = DONE;
          if (c == '=')
@@ -187,15 +188,17 @@ TokenType getToken(void)
            currentToken = GT;
            ungetNextChar();
          }
+         break;
        case INNE:
          state = DONE;
          if (c == '=')
            currentToken = NE;
          else
          { save = FALSE;
-           currentToken = Error;
+           currentToken = ERROR;
            ungetNextChar();
          }
+         break;
        case INOVER:
          if (c == '*')
          { state = INCOMMENT;
@@ -236,7 +239,7 @@ TokenType getToken(void)
          }
          break;
        case INID:
-         if (!isalpha(c))
+         if (!isalpha(c) && !isdigit(c))
          { /* backup in the input */
            ungetNextChar();
            save = FALSE;
