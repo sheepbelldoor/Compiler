@@ -20,7 +20,7 @@ static int yylex(void); // added 11/2/11 to ensure no conflict with lex
 
 %token IF WHILE RETURN INT VOID
 %nonassoc RPAREN
-%nonassoc ELSE
+%nonassoc ELSE 
 %token ID NUM
 %token EQ NE LT LE GT GE LPAREN LBRACE RBRACE LCURLY RCURLY COMMA SEMI
 %token ERROR 
@@ -166,58 +166,28 @@ statement_list      : statement_list statement
                     | empty { $$ = $1; }
                     ;
                     
-statement			: unmatched_stmt { $$ = $1; }
-                    | matched_stmt { $$ = $1; }
-                    // | selection_stmt { $$ = $1; }
-				// | expression_stmt { $$ = $1; }
-                    // | compound_stmt { $$ = $1; }
-                    // | iteration_stmt { $$ = $1; }
-                    // | return_stmt { $$ = $1; }
-				;
-
-unmatched_stmt      : IF LPAREN expression RPAREN statement
-                         {
-                                   $$ = newTreeNode(IfStmt);
-                                   $$->child[0] = $3;
-                                   $$->child[1] = $5;
-                         }
-                    | IF LPAREN expression RPAREN matched_stmt ELSE unmatched_stmt
-                         {
-                                   $$ = newTreeNode(IfStmt);
-                                   $$->child[0] = $3;
-                                   $$->child[1] = $5;
-                                   $$->child[2] = $7;
-                         }
-                    ;
-
-matched_stmt        : IF LPAREN expression RPAREN matched_stmt ELSE matched_stmt
-                         {
-                              	$$ = newTreeNode(IfStmt);
-                                   $$->child[0] = $3;
-                                   $$->child[1] = $5;
-                                   $$->child[2] = $7;                              
-                         }
-                    // | selection_stmt { $$ = $1; }
+statement			: selection_stmt { $$ = $1; }
 				| expression_stmt { $$ = $1; }
                     | compound_stmt { $$ = $1; }
                     | iteration_stmt { $$ = $1; }
-                    | return_stmt { $$ = $1; } 
-                    ;
-
-// selection_stmt		: IF LPAREN expression RPAREN statement ELSE statement
-// 					{
-//                               	$$ = newTreeNode(IfStmt);
-//                                    $$->child[0] = $3;
-//                                    $$->child[1] = $5;
-//                                    $$->child[2] = $7;
-// 					}
-// 				| IF LPAREN expression RPAREN statement 
-// 					{
-// 							$$ = newTreeNode(IfStmt);
-//                                    $$->child[0] = $3;
-//                                    $$->child[1] = $5;
-// 					}
-// 				;
+                    | return_stmt { $$ = $1; }
+				;
+                    
+selection_stmt		: IF LPAREN expression RPAREN statement ELSE statement
+					{
+                              	$$ = newTreeNode(IfStmt);
+                                   $$->flag = TRUE;
+                                   $$->child[0] = $3;
+                                   $$->child[1] = $5;
+                                   $$->child[2] = $7;
+					}
+				| IF LPAREN expression RPAREN statement 
+					{
+							$$ = newTreeNode(IfStmt);
+                                   $$->child[0] = $3;
+                                   $$->child[1] = $5;
+					}
+				;
 
 expression_stmt     : expression SEMI { $$ = $1; }   
                     | SEMI { $$ = NULL; }
@@ -288,16 +258,6 @@ relop               : LE { $$ = newTreeNode(Opcode); $$->lineno = lineno; $$->op
                     
 additive_expression : additive_expression addop term
                          {
-                              /*   ??
-                                   YYSTYPE t = $1; 
-							if (t != NULL)
-                                   {
-								while (t->sibling != NULL) t = t->sibling;
-								t->sibling = $3; 
-								$$ = $1;
-							} 
-							else $$ = $3;
-                              */
                                    $$ = newTreeNode(BinOpExpr);
                                    $$->lineno = $2->lineno;
                                    $$->opcode = $2->opcode;
@@ -312,16 +272,6 @@ addop			: PLUS  { $$ = newTreeNode(Opcode); $$->lineno = lineno; $$->opcode = PL
                     
 term                : term mulop factor
                          {
-                              /*   ??
-                                   YYSTYPE t = $1; 
-							if (t != NULL)
-                                   {
-								while (t->sibling != NULL) t = t->sibling;
-								t->sibling = $3; 
-								$$ = $1;
-							} 
-							else $$ = $3;
-                              */
                                    $$ = newTreeNode(BinOpExpr);
                                    $$->lineno = $2->lineno;
                                    $$->opcode = $2->opcode;
