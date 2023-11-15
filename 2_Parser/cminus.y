@@ -20,7 +20,7 @@ static int yylex(void); // added 11/2/11 to ensure no conflict with lex
 
 %token IF WHILE RETURN INT VOID
 %nonassoc RPAREN
-%nonassoc ELSE 
+%nonassoc ELSE
 %token ID NUM
 %token EQ NE LT LE GT GE LPAREN LBRACE RBRACE LCURLY RCURLY COMMA SEMI
 %token ERROR 
@@ -89,7 +89,7 @@ fun_declaration     : type_specifier identifier LPAREN params RPAREN compound_st
                     ;
 
 params              : param_list { $$ = $1; }
-                    | VOID { $$ = newTreeNode(Params); $$->lineno = lineno; $$->type = Void; }
+                    | VOID { $$ = newTreeNode(Params); $$->flag = TRUE; }
                     ;
 
 param_list          : param_list COMMA param
@@ -131,8 +131,8 @@ param               : type_specifier identifier
 compound_stmt       : LCURLY local_declarations statement_list RCURLY
                          { 
 							$$ = newTreeNode(CompoundStmt);
-                                   $$->child[0] = $1;
-                                   $$->child[1] = $2;
+                                   $$->child[0] = $2;
+                                   $$->child[1] = $3;
                          }
                     ;
 
@@ -166,27 +166,58 @@ statement_list      : statement_list statement
                     | empty { $$ = $1; }
                     ;
                     
-statement			: selection_stmt { $$ = $1; }
-				| expression_stmt { $$ = $1; }
-                    | compound_stmt { $$ = $1; }
-                    | iteration_stmt { $$ = $1; }
-                    | return_stmt { $$ = $1; }
+statement			: unmatched_stmt { $$ = $1; }
+                    | matched_stmt { $$ = $1; }
+                    // | selection_stmt { $$ = $1; }
+				// | expression_stmt { $$ = $1; }
+                    // | compound_stmt { $$ = $1; }
+                    // | iteration_stmt { $$ = $1; }
+                    // | return_stmt { $$ = $1; }
 				;
-                    
-selection_stmt		: IF LPAREN expression RPAREN statement ELSE statement
-					{
-							$$ = newTreeNode(IfStmt);
+
+unmatched_stmt      : IF LPAREN expression RPAREN statement
+                         {
+                                   $$ = newTreeNode(IfStmt);
+                                   $$->child[0] = $3;
+                                   $$->child[1] = $5;
+                         }
+                    | IF LPAREN expression RPAREN matched_stmt ELSE unmatched_stmt
+                         {
+                                   $$ = newTreeNode(IfStmt);
                                    $$->child[0] = $3;
                                    $$->child[1] = $5;
                                    $$->child[2] = $7;
-					}
-				| IF LPAREN expression RPAREN statement 
-					{
-							$$ = newTreeNode(IfStmt);
+                         }
+                    ;
+
+matched_stmt        : IF LPAREN expression RPAREN matched_stmt ELSE matched_stmt
+                         {
+                              	$$ = newTreeNode(IfStmt);
                                    $$->child[0] = $3;
                                    $$->child[1] = $5;
-					}
-				;
+                                   $$->child[2] = $7;                              
+                         }
+                    // | selection_stmt { $$ = $1; }
+				| expression_stmt { $$ = $1; }
+                    | compound_stmt { $$ = $1; }
+                    | iteration_stmt { $$ = $1; }
+                    | return_stmt { $$ = $1; } 
+                    ;
+
+// selection_stmt		: IF LPAREN expression RPAREN statement ELSE statement
+// 					{
+//                               	$$ = newTreeNode(IfStmt);
+//                                    $$->child[0] = $3;
+//                                    $$->child[1] = $5;
+//                                    $$->child[2] = $7;
+// 					}
+// 				| IF LPAREN expression RPAREN statement 
+// 					{
+// 							$$ = newTreeNode(IfStmt);
+//                                    $$->child[0] = $3;
+//                                    $$->child[1] = $5;
+// 					}
+// 				;
 
 expression_stmt     : expression SEMI { $$ = $1; }   
                     | SEMI { $$ = NULL; }
@@ -217,13 +248,20 @@ expression          : var ASSIGN expression
                     | simple_expression { $$ = $1; }
                     ;
 
-var                 : identifier { $$ = $1; }
+var                 : identifier 
+                         {
+                                   $$ = newTreeNode(VarAccessExpr); 
+                                   $$->name = $1->name; 
+                                   $$->lineno = $1->lineno; 
+                                   free($1); 
+                         }
                     | identifier LBRACE expression RBRACE
                          {
 							$$ = newTreeNode(VarAccessExpr);
                                    $$->name = $1->name;
                                    $$->lineno = $1->lineno;
                                    $$->child[0] = $3;
+                                   free($1);
                          }
                     ;
                     
@@ -310,6 +348,7 @@ call                : identifier LPAREN args RPAREN
                                    $$->name = $1->name;
                                    $$->lineno = $1->lineno;
                                    $$->child[0] = $3;
+                                   free($1);
                          }
                     ;
 
