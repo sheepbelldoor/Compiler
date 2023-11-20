@@ -94,7 +94,6 @@ params              : param_list { $$ = $1; }
 
 param_list          : param_list COMMA param
                          {         
-                                   /* Same as declaration_list */
 							YYSTYPE t = $1; 
 							if (t != NULL)
                                    {
@@ -172,7 +171,8 @@ statement			: selection_stmt { $$ = $1; }
                     | iteration_stmt { $$ = $1; }
                     | return_stmt { $$ = $1; }
 				;
-                    
+
+//TODO
 selection_stmt		: IF LPAREN expression RPAREN statement ELSE statement
 					{
                               	$$ = newTreeNode(IfStmt);
@@ -241,8 +241,7 @@ simple_expression   : additive_expression relop additive_expression
                                    $$->lineno = $2->lineno;
                                    $$->opcode = $2->opcode;
                                    $$->child[0] = $1;
-                                   $$->child[1] = $2;
-                                   $$->child[2] = $3;
+                                   $$->child[1] = $3;
                                    free($2);
                          }
                     | additive_expression { $$ = $1; }
