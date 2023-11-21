@@ -172,7 +172,6 @@ statement			: selection_stmt { $$ = $1; }
                     | return_stmt { $$ = $1; }
 				;
 
-//TODO
 selection_stmt		: IF LPAREN expression RPAREN statement ELSE statement
 					{
                               	$$ = newTreeNode(IfStmt);
