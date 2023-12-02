@@ -181,12 +181,16 @@ static void insertNode(TreeNode *t)
 			if (t->flag == TRUE) break;
 			
 			// Semantic Error: Void-Type Parameters
+			if (t->type == Void || t->type == VoidArray) VoidTypeVariableError(t->name, t->lineno);
 			// Semantic Error: Redefined Variables
+			SymbolRec *symbol = lookupSymbolInCurrentScope(currentScope, t->name);
+			if (symbol != NULL) RedefinitionError(t->name, t->lineno, symbol);
 			// Insert New Variable Symbol to Symbol Table
+			insertSymbol(currentScope, t->name, t->type, VariableSym, t->lineno, t);
 			/*********************Fill the Code*************************
 			 *                                                         *
 			 *                                                         *
-			 *                                                         *
+			 *                      Complete!                          *
 			 *                                                         *
 			 *                                                         *
 			************************************************************/
@@ -218,11 +222,14 @@ static void insertNode(TreeNode *t)
 		case VarAccessExpr:
 		{
 			// Semantic Error: Undeclared Variables
+			SymbolRec *symbol = lookupSymbolWithKind(currentScope, t->name, VariableSym); // currentScope? globalScope?
+			if (symbol == NULL) symbol = UndeclaredVariableError(currentScope, t);
 			// Update Symbol Table Entry
+			else appendSymbol(currentScope, t->name, t->lineno);
 			/*********************Fill the Code*************************
 			 *                                                         *
 			 *                                                         *
-			 *                                                         *
+			 *                      Complete!                          *
 			 *                                                         *
 			 *                                                         *
 			************************************************************/
@@ -315,10 +322,11 @@ static void checkNode(TreeNode *t)
 			// Error Check
 			ERROR_CHECK(t->child[0] != NULL);
 			// Semantic Error: Invalid Condition in If/If-Else, While Statement
+			if (t->child[0]->type != Integer) { InvalidConditionError(t->child[0]->lineno); }
 			/*********************Fill the Code*************************
 			 *                                                         *
 			 *                                                         *
-			 *                                                         *
+			 *                      TODO!                          *
 			 *                                                         *
 			 *                                                         *
 			************************************************************/
@@ -332,10 +340,16 @@ static void checkNode(TreeNode *t)
 			// Error Check
 			ERROR_CHECK(currentScope->func != NULL);
 			// Semantic Error: Invalid Return
+			if (t->child[0] == NULL) {
+				if (currentScope->func->type != Void) { InvalidReturnError(t->lineno); }
+			}
+			else {
+				if (currentScope->func->type != t->child[0]->type) { InvalidReturnError(t->lineno); }
+			}
 			/*********************Fill the Code*************************
 			 *                                                         *
 			 *                                                         *
-			 *                                                         *
+			 *                       Complete!                         *
 			 *                                                         *
 			 *                                                         *
 			************************************************************/
@@ -349,10 +363,19 @@ static void checkNode(TreeNode *t)
 			// Error Check
 			ERROR_CHECK(t->child[0] != NULL && t->child[1] != NULL);
 			// Semantic Error: Invalid Assignment / Operation
+			// LHS & RHS should have same type
+			if (t->child[0]->type != t->child[1]->type) {
+				// Case of Assignment
+				if (t->kind == AssignExpr) { InvalidAssignmentError(t->lineno); }
+				// Case of Operation
+				else {
+					if (t->child[0]->type != Integer || t->child[1]->type != Integer) { InvalidOperationError(t->lineno); }
+				}
+			}
 			/*********************Fill the Code*************************
 			 *                                                         *
 			 *                                                         *
-			 *                                                         *
+			 *                       Complete!                         *
 			 *                                                         *
 			 *                                                         *
 			************************************************************/
@@ -376,10 +399,27 @@ static void checkNode(TreeNode *t)
 			// Semantic Error: Invalid Arguments
 			TreeNode *paramNode = calleeSymbol->node->child[0];
 			TreeNode *argNode = t->child[0];
+
+			if (argNode != NULL) {
+				while (paramNode != NULL && argNode != NULL) {
+					// Type check
+					if (paramNode->type != argNode->type) { InvalidFunctionCallError(t->name, t->lineno); }
+
+					paramNode = paramNode->sibling;
+					argNode = argNode->sibling;
+				}
+				// Number of arguments check
+				if (paramNode != NULL) { InvalidFunctionCallError(t->name, t->lineno); }
+				if (argNode != NULL) { InvalidFunctionCallError(t->name, t->lineno); }
+			}
+			else {
+				if (paramNode->type != Void) { InvalidFunctionCallError(t->name, t->lineno); }
+			}
+
 			/*********************Fill the Code*************************
 			 *                                                         *
 			 *                                                         *
-			 *                                                         *
+			 *                      Complete!                          *
 			 *                                                         *
 			 *                                                         *
 			************************************************************/
@@ -403,12 +443,14 @@ static void checkNode(TreeNode *t)
 			// Array Access or Not
 			if (t->child[0] != NULL)
 			{
-				// Semantic Error: Index to Not Array				
+				// Semantic Error: Index to Not Array
+				if (symbol->type != IntegerArray) ArrayIndexingError2(t->name, t->lineno);			
 				// Semantic Error: Index is not Integer in Array Indexing
+				if (t->child[0]->type != Integer) ArrayIndexingError(t->name, t->lineno);
 				/*********************Fill the Code*************************
 				 *                                                         *
 				 *                                                         *
-				 *                                                         *
+				 *                      TODO!                          *
 				 *                                                         *
 				 *                                                         *
 				************************************************************/
